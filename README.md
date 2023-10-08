@@ -4,8 +4,22 @@
 
 [Final Project Results - Presentation Template](https://docs.google.com/presentation/d/1VomhfLT44Au1oSgFZ38M9dDQbBE9dbNZ8j4MF_u6go0/edit#slide=id.gf31e78ab7c_2_12)
 
-TODO:
+### TODO:
 - Form team on Kaggle
-- Verify dates for competition
 - Create initial project plan
-- Setup Kaggle API (Chris: I will look, I think I have it already)
+- Setup Kaggle API (might be needed per user)
+
+---
+
+### Deadlines:
+- Week 7: 
+    - Project plan
+    - Initial data exploration
+    - Initial model
+    - Initial results
+
+- Week 8:
+    - ...
+
+- Week 9:
+    - ...
