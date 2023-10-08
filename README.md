@@ -1,25 +1,18 @@
 # DNN-Final-Project
 
-[Competition Link](https://www.kaggle.com/competitions/optiver-trading-at-the-close)
+## Links:
 
-[Final Project Results - Presentation Template](https://docs.google.com/presentation/d/1VomhfLT44Au1oSgFZ38M9dDQbBE9dbNZ8j4MF_u6go0/edit#slide=id.gf31e78ab7c_2_12)
+[Competition](https://www.kaggle.com/competitions/optiver-trading-at-the-close)
 
-### TODO:
-- Form team on Kaggle
-- Create initial project plan
-- Setup Kaggle API (might be needed per user)
+[GitHub Repository](https://github.com/cvaisnor/DNN-Final-Project)
 
----
+[Google Slides Presentation](https://docs.google.com/presentation/d/1Xc5F1_NveFi1il3GqHej2aqVmklR_jZU4kx6ZJhiDEM/edit?usp=sharing)
 
-### Deadlines:
-- Week 7: 
-    - Project plan
-    - Initial data exploration
-    - Initial model
-    - Initial results
+## Repository Structure:
+- /reference_notebooks - contains public notebooks from the competition
+- /data - contains the data for the competition (not included in repo, download [here](https://www.kaggle.com/competitions/optiver-trading-at-the-close/data))
+- /...
 
-- Week 8:
-    - ...
-
-- Week 9:
-    - ...
+## TODO:
+- Exploratory Data Analysis
+- First submission to Kaggle (due 10/15)
