@@ -10,9 +10,11 @@
 
 ## Repository Structure:
 - /reference_notebooks - contains public notebooks from the competition
-- /data - contains the data for the competition (not included in repo, download [here](https://www.kaggle.com/competitions/optiver-trading-at-the-close/data))
+- /kaggle - folder structure for input data, should be /kaggle/input/optiver-trading-at-the-close/...
 - /...
 
 ## TODO:
 - Exploratory Data Analysis
-- First submission to Kaggle (due 10/15)
+
+
+![Target Submission Format](images/target_format.png)
