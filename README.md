@@ -64,7 +64,23 @@
 - **Sector-Specific Movements:** Unified sectoral price movements.
 - **Lagged Reactions:** Delayed stock or market reactions.
 
-## Links:
+## Correlations
+
+### Strong Positive Correlations (close to 1):
+- `reference_price` has a strong positive correlation with `matched_size`, `bid_price`, `ask_price`, and `vwap`.
+- `bid_price` and `bid_size` show a strong positive correlation.
+- `ask_price` and `ask_size` are also positively correlated.
+- `near_price` and `far_price` have a strong positive correlation.
+
+### Strong Negative Correlations (close to -1):
+- `reference_price` and `ask_size` exhibit a strong negative correlation.
+
+### Moderate Correlations:
+- `imbalance_size` has a moderate positive correlation with variables like `imbalance_buy_sell_flag` and `near_price`.
+
+### Weak Correlations:
+- Variables like `stock_id`, `seconds_in_bucket`, `date_id`, and `time_id` show very weak correlations with most other variables.
+
 
 - [Competition](https://www.kaggle.com/competitions/optiver-trading-at-the-close)
 - [GitHub Repository](https://github.com/cvaisnor/DNN-Final-Project)
