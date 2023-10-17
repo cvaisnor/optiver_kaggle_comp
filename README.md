@@ -81,7 +81,7 @@
 ### Weak Correlations:
 - Variables like `stock_id`, `seconds_in_bucket`, `date_id`, and `time_id` show very weak correlations with most other variables.
 
-
+## Links:
 - [Competition](https://www.kaggle.com/competitions/optiver-trading-at-the-close)
 - [GitHub Repository](https://github.com/cvaisnor/DNN-Final-Project)
 - [Google Slides Presentation](https://docs.google.com/presentation/d/1Xc5F1_NveFi1il3GqHej2aqVmklR_jZU4kx6ZJhiDEM/edit?usp=sharing)
