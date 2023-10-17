@@ -64,7 +64,7 @@
 - **Sector-Specific Movements:** Unified sectoral price movements.
 - **Lagged Reactions:** Delayed stock or market reactions.
 
-## Correlations
+## Correlations:
 
 ### Strong Positive Correlations (close to 1):
 - `reference_price` has a strong positive correlation with `matched_size`, `bid_price`, `ask_price`, and `vwap`.
