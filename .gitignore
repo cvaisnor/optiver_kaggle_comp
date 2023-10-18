@@ -2,5 +2,5 @@ __pycache__
 
 # coping the kaggle environment naming convention
 /kaggle 
-
+.ipynb_checkpoints/
 *.csv
