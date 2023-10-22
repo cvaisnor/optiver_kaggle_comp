@@ -85,6 +85,7 @@
 - [Competition](https://www.kaggle.com/competitions/optiver-trading-at-the-close)
 - [GitHub Repository](https://github.com/cvaisnor/DNN-Final-Project)
 - [Google Slides Presentation](https://docs.google.com/presentation/d/1Xc5F1_NveFi1il3GqHej2aqVmklR_jZU4kx6ZJhiDEM/edit?usp=sharing)
+- [Google Slides Presentation Week 8](https://docs.google.com/presentation/d/1C3Ci4o3c2e_eLcuDNhF5jlLPaHYleNkZZpoKyBaXnHQ/edit?usp=sharing)
 
 ## Repository Structure:
 - `/images` - contains images used in README.md
