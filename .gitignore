@@ -4,3 +4,4 @@ __pycache__
 /kaggle 
 .ipynb_checkpoints/
 *.csv
+.DS_Store
