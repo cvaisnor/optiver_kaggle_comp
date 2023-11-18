@@ -5,3 +5,6 @@ __pycache__
 .ipynb_checkpoints/
 *.csv
 .DS_Store
+
+# vaisnor model experiments
+/vaisnor_autoML
