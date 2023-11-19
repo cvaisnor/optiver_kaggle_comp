@@ -21,7 +21,7 @@ for dirname, _, filenames in os.walk(data_path):
 try:
     original_train = pd.read_csv(data_path + 'optiver-trading-at-the-close/train.csv')
 except:
-    original_train = pd.read_csv(r'C:\Users\marko\OneDrive\Documents\MSGIS_Assignments\Sixth_Semester\EN742_Neural_Networks\EN742_FINAL_PROJECT\train.csv')
+    original_train = pd.read_csv(r'C:\Users\marko\EN742_FINAL_PROJECT\train.csv')
 # revealed_targets = pd.read_csv(data_path + 'optiver-trading-at-the-close/example_test_files/revealed_targets.csv')
 # test = pd.read_csv(data_path + 'optiver-trading-at-the-close/example_test_files/test.csv')
 # sample_submission = pd.read_csv(data_path + 'optiver-trading-at-the-close/example_test_files/sample_submission.csv')
