@@ -430,7 +430,7 @@ with tf.device('/CPU:0'):
     # mae = mean_absolute_error(y_test, predictions)
     # print(f"Mean Absolute Error on the test set: {mae:.4f}")
 
-import sys; sys.path.append(r'C:\Users\marko\OneDrive\Documents\MSGIS_Assignments\Sixth_Semester\EN742_Neural_Networks\EN742_FINAL_PROJECT')
+import sys; sys.path.append(r'C:\Users\EN742_FINAL_PROJECT')
 
 import optiver2023
 env = optiver2023.make_env()
