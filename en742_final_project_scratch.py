@@ -21,7 +21,7 @@ for dirname, _, filenames in os.walk(data_path):
 try:
     original_train = pd.read_csv(data_path + 'optiver-trading-at-the-close/train.csv')
 except:
-    original_train = pd.read_csv(r'C:\Users\marko\EN742_FINAL_PROJECT\train.csv')
+    original_train = pd.read_csv(r'C:\Users\marko\OneDrive\Documents\MSGIS_Assignments\Sixth_Semester\EN742_Neural_Networks\EN742_FINAL_PROJECT\train.csv')
 # revealed_targets = pd.read_csv(data_path + 'optiver-trading-at-the-close/example_test_files/revealed_targets.csv')
 # test = pd.read_csv(data_path + 'optiver-trading-at-the-close/example_test_files/test.csv')
 # sample_submission = pd.read_csv(data_path + 'optiver-trading-at-the-close/example_test_files/sample_submission.csv')
@@ -190,6 +190,40 @@ class PolynomialFeaturesWrapper(BaseEstimator, TransformerMixin):
         transformed_array = self.poly.transform(X)
         return pd.DataFrame(transformed_array, columns=self.new_feature_names)
 
+#
+# class proportion_transformer(BaseEstimator, TransformerMixin):
+#     def __init__(self, in_ndarray, min_val_from_X, max_val_from_X):
+#         self.in_ndarray = in_ndarray
+#         self.min_val_from_X = min_val_from_X
+#         self.max_val_from_X = max_val_from_X
+#         self.in_pd_series = pd.Series(self.in_ndarray)
+#
+#     def fit(self, X, y=None):
+#         return self
+#
+#     def transform(self, X, inverse=False):
+#         # used to normalize values in 'target' field, target field is also already gaussian distribution
+#         if not isinstance(X, pd.DataFrame):
+#             X = pd.DataFrame(X)
+#
+#         for col in list(X.columns):
+#             max_num = X[col].max()
+#             min_num = X[col].min()
+#             median = X[col].median()
+#
+#             def if_else_function(row):
+#                 if row < median:
+#                     x = min_num / self.min_val_from_X
+#                 else:
+#                     x = max_num / self.max_val_from_X
+#                 if inverse:
+#                     return row * x
+#                 else:
+#                     return row / x
+#             X[col] = pd.Series(np.vectorize(if_else_function)(self.in_pd_series))
+#
+#         return X
+
 
 # Column Preprocessor
 columns_to_keep = [
@@ -210,6 +244,10 @@ preprocessor = ColumnTransformer(
     ],
     remainder='drop'  # Drop other columns
 )
+
+y_std = train['target'].std()
+y_median = train['target'].median()
+y = train['target'].fillna(np.random.randint(y_median - y_std, y_median + y_std) / np.random.randint(101, 199)).values
 
 # Main Pipeline
 pipeline = Pipeline([
@@ -233,16 +271,67 @@ pipeline = Pipeline([
     # ('alleged_robust_scalar', RobustScaler())
     ('yeo_johnson', PowerTransformer()),
     # ('standard_scalar', StandardScaler())
-    ('quantile_transformer', QuantileTransformer(output_distribution='normal'))
+    ('quantile_transformer', QuantileTransformer(output_distribution='normal')),
+    # ('proportion_transformer', proportion_transformer(y, np.min(y), np.max(y)))
     # ('alleged_robust_scalar', RobustScaler(unit_variance=True))
 ])
 
+
+# def proportion_transformer(in_df, min_val_from_X, max_val_from_X, inverse=False):
+#     out_df = in_df.copy()
+#
+#     for col in list(out_df.columns):
+#
+#         in_pd_series = out_df[col]
+#
+#         max_num = in_pd_series.max()
+#         min_num = in_pd_series.min()
+#         median = in_pd_series.median()
+#
+#         def if_else_function(row):
+#             if row < median:
+#                 x = min_num / min_val_from_X
+#             else:
+#                 x = max_num / max_val_from_X
+#             if inverse:
+#                 return row * x
+#             else:
+#                 return row / x
+#
+#         out_df[col] = pd.Series(np.vectorize(if_else_function)(in_pd_series))
+#
+#     return out_df
+
+
 x_fields = [c for c in list(train.columns) if c != 'target']
-train_transformed = pipeline.fit_transform(train[x_fields])
+train_transformed = pd.DataFrame(pipeline.fit_transform(train[x_fields]))
 # test_transformed = pipeline.transform(test)
 
-X = pd.DataFrame(train_transformed)
+
+def proportion_transformer(in_df, min_val_from_X_or_y=pd.Series(y).min(), max_val_from_X_or_y=pd.Series(y).max()):
+    # assumes fields within in_df are normally distributed (gaussian)
+    out_df = in_df.copy()
+    for col in list(out_df.columns):
+
+        in_pd_series = out_df[col].copy()
+
+        max_num = in_pd_series.max()
+        min_num = in_pd_series.min()
+        median = in_pd_series.median()
+
+        def if_else_function(row):
+            if row < median:
+                x = min_num / min_val_from_X_or_y
+            else:
+                x = max_num / max_val_from_X_or_y
+            return row / x
+
+        out_df[col] = pd.Series(np.vectorize(if_else_function)(in_pd_series))
+    return out_df
+
+
 # X_test = test_transformed
+X = proportion_transformer(train_transformed)
 
 
 def generate_features(cumulative_test_df, current_test, pipeline):
@@ -279,33 +368,10 @@ def generate_features(cumulative_test_df, current_test, pipeline):
 #
 # scaled_X = pd.DataFrame(std_scalar.fit_transform(X), columns=x_fields)
 
+# y_transformed = y_transformer(y, X.min().min(), X.max().max())
+# inverse = y_transformer(y_transformed, X.min().min(), X.max().max(), inverse=True)
 
-def y_transformer(in_ndarray, min_val_from_X, max_val_from_X, inverse=False):
-    # used to normalize values in 'target' field, target field is also already gaussian distribution
-    in_pd_series = pd.Series(in_ndarray)
-
-    max_num = in_pd_series.max()
-    min_num = in_pd_series.min()
-    median = in_pd_series.median()
-
-    def if_else_function(row):
-        if row < median:
-            x = min_num / min_val_from_X
-        else:
-            x = max_num / max_val_from_X
-        if inverse:
-            return row * x
-        else:
-            return row / x
-
-    return pd.Series(np.vectorize(if_else_function)(in_pd_series))
-
-
-y = train['target'].values
-y_transformed = y_transformer(y, X.min().min(), X.max().max())
-inverse = y_transformer(y_transformed, X.min().min(), X.max().max(), inverse=True)
-
-historical_data = pd.DataFrame(pd.concat([X, pd.DataFrame(y_transformed,  columns=['target'])], axis=1),
+historical_data = pd.DataFrame(pd.concat([X, pd.DataFrame(y,  columns=['target'])], axis=1),
                                columns=list(X.columns) + ['target'])
 
 total_timesteps, num_features = historical_data.shape
@@ -415,22 +481,22 @@ validation_data = (validation_inputs, validation_outputs)
 #     return output
 
 
-with tf.device('/CPU:0'):
-    callbacks = []
-    hist = m.fit(train_inputs, train_outputs, validation_data=validation_data,
-        epochs=5, batch_size=16, callbacks=callbacks
-    )
+# with tf.device('/CPU:0'):
+callbacks = []
+hist = m.fit(train_inputs, train_outputs, validation_data=validation_data,
+    epochs=5, batch_size=16, callbacks=callbacks
+)
 
-    from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error
 
-    # predictions = reverse_scalar(historical_data.iloc[-training_set_size:, :],
-    #                              m.predict(historical_data.iloc[-training_set_size:, :].values[np.newaxis,...]).flatten(),
-    #                              std_scalar)
-    predictions = m.predict(historical_data.iloc[-training_set_size:, :].values[np.newaxis, ...]).flatten()
-    # mae = mean_absolute_error(y_test, predictions)
-    # print(f"Mean Absolute Error on the test set: {mae:.4f}")
+# predictions = reverse_scalar(historical_data.iloc[-training_set_size:, :],
+#                              m.predict(historical_data.iloc[-training_set_size:, :].values[np.newaxis,...]).flatten(),
+#                              std_scalar)
+predictions = m.predict(historical_data.iloc[-training_set_size:, :].values[np.newaxis, ...]).flatten()
+# mae = mean_absolute_error(y_test, predictions)
+# print(f"Mean Absolute Error on the test set: {mae:.4f}")
 
-import sys; sys.path.append(r'C:\Users\EN742_FINAL_PROJECT')
+import sys; sys.path.append(r'C:\Users\marko\OneDrive\Documents\MSGIS_Assignments\Sixth_Semester\EN742_Neural_Networks\EN742_FINAL_PROJECT')
 
 import optiver2023
 env = optiver2023.make_env()
@@ -453,17 +519,39 @@ for (test_in, revealed_targets, sample_prediction) in iter_test:
     cumulative_test_df = pd.concat([cumulative_test_df, test_in], axis=0, ignore_index=True)
 
     # Generate features
-    test_transformed = generate_features(cumulative_test_df, test_in, pipeline)
+    test_transformed = proportion_transformer(generate_features(cumulative_test_df, test_in, pipeline))
     # test_transformed_scaled = pd.DataFrame(std_scalar.fit_transform(test_transformed), columns=list(test_transformed))
 
     # Writes our predictions
     # preds = m.predict(test_transformed_scaled.values[np.newaxis, ...]).flatten()
     # sample_prediction["target"] = reverse_scalar(test_transformed_scaled, preds, std_scalar)['target']
-    max_num = test_transformed.max().max()
-    min_num = test_transformed.min().min()
+#     max_num = test_transformed.max().max()
+#     min_num = test_transformed.min().min()
     pred = m.predict(test_transformed.values[np.newaxis, ...]).flatten()
-    sample_prediction["target"] = y_transformer(pred, min_num, max_num, inverse=True)
+    sample_prediction["target"] = pd.Series(pred) # y_transformer(pred, min_num, max_num, inverse=True)
+    if 'row_id' in sample_prediction['row_id'].values.tolist():
+        print(f'Found extra row_id field in iteration: {counter + 1}, deleting row...')
+        i = sample_prediction[sample_prediction['row_id'] == 'row_id'].index
+        sample_prediction.drop(i, inplace=True)
+
+    # if sample_prediction['target'].dtype != np.float64:
+    #     print(f'Found characters in target field on iteration: {counter + 1}, filling value...')
+    std = sample_prediction['target'].std() if not np.isnan(sample_prediction['target'].std()) else pd.concat(env.predictions)['target'].std()
+    median = sample_prediction['target'].median() if not np.isnan(sample_prediction['target'].median()) else pd.concat(env.predictions)['target'].median()
+    if np.isnan(std) and np.isnan(median):
+        std = y_std
+        median = y_median
+    else:
+        std = std if not np.isnan(std) else y_std
+        median = median if not np.isnan(median) else y_median
+    high = int(round(median - std)) if median - std > median + std else int(round(median + std))
+    low = int(round(median - std)) if median - std < median + std else int(round(median + std))
+    if low >= high:
+        sample_prediction['target'] = pd.to_numeric(sample_prediction['target'], errors='coerce').fillna(np.random.randint(high, low + 1) + (np.random.randint(11e9, 19e9) / 10e9))
+    else:
+        sample_prediction['target'] = pd.to_numeric(sample_prediction['target'], errors='coerce').fillna(np.random.randint(low, high) + (np.random.randint(11e9, 19e9) / 10e9))
 
     # This line submit our predictions.
     env.predict(sample_prediction)
     counter += 1
+
