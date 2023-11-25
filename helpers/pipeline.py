@@ -17,7 +17,7 @@ class LogFeatures(BaseEstimator, TransformerMixin):
 
     def transform(self, X, y=None):
         for column in self.columns:
-            X.loc[:, f'{column}_log'] = np.log1p(X[column].clip(lower=0.00001))
+            X[f'{column}_log'] = np.log1p(X[column].clip(lower=0.00001))
         return X
 
 class LagFeatures(BaseEstimator, TransformerMixin):
@@ -32,7 +32,7 @@ class LagFeatures(BaseEstimator, TransformerMixin):
     def transform(self, X, y=None):
         for feature in self.features:
             for shift_size in self.shift_sizes:
-                X.loc[:, f'{feature}_lag_{shift_size}'] = X.groupby('stock_id')[feature].shift(shift_size)
+                X[f'{feature}_lag_{shift_size}'] = X.groupby('stock_id')[feature].shift(shift_size)
         return X
 
 class RollingMeanFeatures(BaseEstimator, TransformerMixin):
@@ -47,7 +47,7 @@ class RollingMeanFeatures(BaseEstimator, TransformerMixin):
     def transform(self, X, y=None):
         for feature in self.features:
             for window_size in self.window_sizes:
-                X.loc[:, f'{feature}_rolling_mean{window_size}'] = X.groupby('stock_id')[feature].rolling(window=window_size).mean().reset_index(level=0, drop=True)
+                X[f'{feature}_rolling_mean{window_size}'] = X.groupby('stock_id')[feature].rolling(window=window_size).mean().reset_index(level=0, drop=True)
         return X
 
 class DiffFeatures(BaseEstimator, TransformerMixin):
@@ -60,7 +60,7 @@ class DiffFeatures(BaseEstimator, TransformerMixin):
 
     def transform(self, X, y=None):
         for feature in self.features:
-            X.loc[:, f'{feature}_diff'] = X.groupby('stock_id')[feature].diff()
+            X[f'{feature}_diff'] = X.groupby('stock_id')[feature].diff()
         return X
 
 class ExpandingMeanFeatures(BaseEstimator, TransformerMixin):
@@ -73,8 +73,24 @@ class ExpandingMeanFeatures(BaseEstimator, TransformerMixin):
 
     def transform(self, X, y=None):
         for feature in self.features:
-            X.loc[:, f'{feature}_expanding_mean'] = X.groupby('stock_id')[feature].expanding().mean().reset_index(level=0, drop=True)
+            X[f'{feature}_expanding_mean'] = X.groupby('stock_id')[feature].expanding().mean().reset_index(level=0, drop=True)
         return X
+
+class DropColumns(BaseEstimator, TransformerMixin):
+    '''Drops columns from the data frame.'''
+    def __init__(self, columns):
+        self.columns = columns
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X, y=None):
+        all_columns = X.columns
+        drop_columns = []
+        for column in self.columns:
+            if column in all_columns:
+                drop_columns.append(column)
+        return X.drop(columns=drop_columns)
 
 class ForwardFillValues(BaseEstimator, TransformerMixin):
     '''Transformer for forward filling NaN values in the DataFrame, grouped by stock_id.'''
@@ -84,7 +100,7 @@ class ForwardFillValues(BaseEstimator, TransformerMixin):
 
     def transform(self, X, y=None):
         for column in X.columns:
-            X[column] = X.groupby('stock_id')[column].transform(lambda group: group.fillna(method='ffill'))
+            X[column] = X.groupby('stock_id')[column].transform(lambda group: group.ffill())
         return X
 
 
