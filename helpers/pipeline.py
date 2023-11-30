@@ -22,9 +22,10 @@ class LogFeatures(BaseEstimator, TransformerMixin):
 
 class LagFeatures(BaseEstimator, TransformerMixin):
     '''Transformer for creating lag features for specified columns and shift sizes.'''
-    def __init__(self, features, shift_sizes):
+    def __init__(self, features, shift_sizes, default_value):
         self.features = features
         self.shift_sizes = shift_sizes
+        self.default_value = default_value
 
     def fit(self, X, y=None):
         return self
@@ -32,8 +33,12 @@ class LagFeatures(BaseEstimator, TransformerMixin):
     def transform(self, X, y=None):
         for feature in self.features:
             for shift_size in self.shift_sizes:
-                X[f'{feature}_lag_{shift_size}'] = X.groupby('stock_id')[feature].shift(shift_size)
+                lag_col = f'{feature}_lag_{shift_size}'
+                X[lag_col] = X.groupby(['stock_id', 'date_id'])[feature].shift(shift_size)
+                X[lag_col].fillna(self.default_value, inplace=True)
+
         return X
+
 
 class RollingMeanFeatures(BaseEstimator, TransformerMixin):
     '''Transformer for calculating rolling mean of each feature over each specified window size.'''
@@ -45,10 +50,20 @@ class RollingMeanFeatures(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
+        rolling_mean_columns = []
+
         for feature in self.features:
             for window_size in self.window_sizes:
-                X[f'{feature}_rolling_mean{window_size}'] = X.groupby('stock_id')[feature].rolling(window=window_size).mean().reset_index(level=0, drop=True)
+                rolling_mean_col = f'{feature}_rolling_mean{window_size}'
+                rolling_mean_columns.append(rolling_mean_col)
+
+                X[rolling_mean_col] = X.groupby(['stock_id', 'date_id'])[feature].rolling(window=window_size).mean().reset_index(level=[0,1], drop=True)
+
+        for col in rolling_mean_columns:
+            X[col].fillna(1.0, inplace=True)
+
         return X
+
 
 class DiffFeatures(BaseEstimator, TransformerMixin):
     '''Transformer for computing the difference of each feature column (i.e., first discrete difference).'''
@@ -60,8 +75,13 @@ class DiffFeatures(BaseEstimator, TransformerMixin):
 
     def transform(self, X, y=None):
         for feature in self.features:
-            X[f'{feature}_diff'] = X.groupby('stock_id')[feature].diff()
+            diff_col = f'{feature}_diff'
+
+            X[diff_col] = X.groupby(['stock_id', 'date_id'])[feature].diff()
+            X[diff_col].fillna(0.0, inplace=True)
+
         return X
+
 
 class ExpandingMeanFeatures(BaseEstimator, TransformerMixin):
     '''Transformer for calculating the expanding mean of each of the feature columns.'''
@@ -72,8 +92,17 @@ class ExpandingMeanFeatures(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
+        expanding_mean_columns = []
+
         for feature in self.features:
-            X[f'{feature}_expanding_mean'] = X.groupby('stock_id')[feature].expanding().mean().reset_index(level=0, drop=True)
+            expanding_mean_col = f'{feature}_expanding_mean'
+            expanding_mean_columns.append(expanding_mean_col)
+
+            X[expanding_mean_col] = X.groupby(['stock_id', 'date_id'])[feature].expanding().mean().reset_index(level=[0,1], drop=True)
+
+        for col in expanding_mean_columns:
+            X[col].fillna(1.0, inplace=True)
+
         return X
 
 class DropColumns(BaseEstimator, TransformerMixin):
@@ -100,6 +129,7 @@ class ForwardFillValues(BaseEstimator, TransformerMixin):
 
     def transform(self, X, y=None):
         for column in X.columns:
+            # X[column] = X.groupby(['stock_id', 'date_id'])[column].transform(lambda group: group.ffill())
             X[column] = X.groupby('stock_id')[column].transform(lambda group: group.ffill())
         return X
 
@@ -110,7 +140,16 @@ class FillZero(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        X = X.fillna(0)
+        X = X.fillna(0.0)
+        return X
+
+class FillOne(BaseEstimator, TransformerMixin):
+    '''Transformer for replacing NaN values with one in the DataFrame.'''
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X, y=None):
+        X = X.fillna(1.0)
         return X
 
 class DataFrameWrapper(BaseEstimator, TransformerMixin):
