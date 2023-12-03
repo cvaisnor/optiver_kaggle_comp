@@ -8,3 +8,5 @@ __pycache__
 
 # vaisnor model experiments
 /vaisnor_autoML
+/optuna_test
+/lightning_logs
