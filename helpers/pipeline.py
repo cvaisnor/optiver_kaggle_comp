@@ -20,6 +20,36 @@ class LogFeatures(BaseEstimator, TransformerMixin):
             X[f'{column}_log'] = np.log1p(X[column].clip(lower=0.00001))
         return X
 
+class CombineFeatures(BaseEstimator, TransformerMixin):
+    '''Transformer for applying logarithmic transformation to specified columns.'''
+    def __init__(self, combined_features_list):
+        self.combined_features_list = combined_features_list
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X, y=None):
+        for combined_features in self.combined_features_list:
+            combined_feature_name = '_'.join(combined_features)
+            X[combined_feature_name] = X[combined_features].prod(axis=1)
+        return X
+
+class SubtractFeatures(BaseEstimator, TransformerMixin):
+    """Transformer to subtract one feature from another."""
+
+    def __init__(self, base_feature, feature_to_subtract):
+        self.feature_to_subtract = feature_to_subtract
+        self.base_feature = base_feature
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        new_feature_name = f"{self.base_feature}_minus_{self.feature_to_subtract}"
+        X[new_feature_name] = X[self.base_feature] - X[self.feature_to_subtract]
+
+        return X
+
 class LagFeatures(BaseEstimator, TransformerMixin):
     '''Transformer for creating lag features for specified columns and shift sizes.'''
     def __init__(self, features, shift_sizes, default_value):
