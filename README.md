@@ -1,4 +1,4 @@
-# DNN-Final-Project
+# Optiver - Trading at the Close | Kaggle
 
 ## Links:
 - [Competition](https://www.kaggle.com/competitions/optiver-trading-at-the-close)
